@@ -119,7 +119,7 @@ export function ChainOfCustodyCertificate({ data }: { data: CustodyCertificateDa
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>CHAIN OF CUSTODY CERTIFICATE</Text>
-          <Text style={styles.subtitle}>Criminal Record Management System (CRMS)</Text>
+          <Text style={styles.subtitle}>Criminal Record Management System (OpenJustice)</Text>
         </View>
 
         <View style={styles.section}>

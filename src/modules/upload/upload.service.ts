@@ -15,7 +15,7 @@ export class UploadService {
   private readonly bucket: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucket = this.configService.get<string>('S3_BUCKET', 'crms-evidence');
+    this.bucket = this.configService.get<string>('S3_BUCKET', 'openjustice-evidence');
     this.s3 = new S3Client({
       endpoint: this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000'),
       region: this.configService.get<string>('S3_REGION', 'us-east-1'),

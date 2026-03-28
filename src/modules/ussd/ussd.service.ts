@@ -89,7 +89,7 @@ export class UssdService {
     // Check if phone is registered
     session.state = UssdState.AUTH_PIN;
     return this.continueResponse(
-      'CRMS Field Query Tool\n\nEnter your Quick PIN to authenticate:',
+      'OpenJustice Field Query Tool\n\nEnter your Quick PIN to authenticate:',
     );
   }
 

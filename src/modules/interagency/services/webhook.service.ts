@@ -44,8 +44,8 @@ export class WebhookService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-CRMS-Signature': signature,
-            'X-CRMS-Event': event,
+            'X-OpenJustice-Signature': signature,
+            'X-OpenJustice-Event': event,
           },
           body,
           signal: AbortSignal.timeout(10000),

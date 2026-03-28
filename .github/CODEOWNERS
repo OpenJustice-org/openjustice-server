@@ -1,0 +1,10 @@
+# Default reviewer for all files
+* @OpenJustice-org/maintainers
+
+# Auth and security modules
+src/modules/auth/ @OpenJustice-org/maintainers
+src/modules/roles/ @OpenJustice-org/maintainers
+src/common/guards/ @OpenJustice-org/maintainers
+
+# Database schema
+prisma/ @OpenJustice-org/maintainers

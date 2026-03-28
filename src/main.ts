@@ -63,9 +63,9 @@ async function bootstrap() {
 
   // Swagger
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('CRMS Framework API')
+    .setTitle('OpenJustice API')
     .setDescription(
-      'Criminal Record Management System — Pan-African Digital Public Good',
+      'OpenJustice — Pan-African Digital Public Good',
     )
     .setVersion('1.0')
     .addBearerAuth()
@@ -81,7 +81,7 @@ async function bootstrap() {
   await app.listen(port);
 
   const logger = app.get(Logger);
-  logger.log(`CRMS Server running on http://localhost:${port}`);
+  logger.log(`OpenJustice Server running on http://localhost:${port}`);
   logger.log(`Swagger docs at http://localhost:${port}/api/docs`);
 }
 

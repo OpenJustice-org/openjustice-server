@@ -4,6 +4,6 @@ export default registerAs('s3', () => ({
   endpoint: process.env.S3_ENDPOINT || 'http://localhost:9000',
   accessKey: process.env.S3_ACCESS_KEY || 'minioadmin',
   secretKey: process.env.S3_SECRET_KEY || 'minioadmin',
-  bucket: process.env.S3_BUCKET || 'crms-evidence',
+  bucket: process.env.S3_BUCKET || 'openjustice-evidence',
   region: process.env.S3_REGION || 'us-east-1',
 }));

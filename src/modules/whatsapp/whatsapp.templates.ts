@@ -50,9 +50,9 @@ export function mainMenuTemplate(name: string, phone: string): WhapiListMessage 
   return {
     to: phone.includes('@') ? phone : `${phone}@s.whatsapp.net`,
     type: 'list',
-    header: { type: 'text', text: '🔍 CRMS Field Tools' },
+    header: { type: 'text', text: '🔍 OpenJustice Field Tools' },
     body: { text: `${greeting}\n\nSelect a check type below:` },
-    footer: { text: 'Sierra Leone Police - CRMS' },
+    footer: { text: 'Sierra Leone Police - OpenJustice' },
     action: {
       list: {
         label: 'Select Check Type',
@@ -93,7 +93,7 @@ export function mainMenuTemplate(name: string, phone: string): WhapiListMessage 
             {
               id: 'help',
               title: '❓ Help & Guide',
-              description: 'Learn how to use CRMS Field Tools',
+              description: 'Learn how to use OpenJustice Field Tools',
             },
           ],
         },
@@ -110,7 +110,7 @@ export function authBadgePromptTemplate(): string {
 }
 
 export function authSuccessTemplate(name: string): string {
-  return `✅ *Authenticated*\n\nWelcome, *${name}*! You now have access to CRMS Field Tools.`;
+  return `✅ *Authenticated*\n\nWelcome, *${name}*! You now have access to OpenJustice Field Tools.`;
 }
 
 export function authFailTemplate(attemptsLeft: number): string {
@@ -250,10 +250,10 @@ export function errorTemplate(error?: string): string {
 }
 
 export function helpTemplate(): string {
-  return `📘 *CRMS Field Tools - User Guide*
+  return `📘 *OpenJustice Field Tools - User Guide*
 ━━━━━━━━━━━━━━━━━━━━
 
-*🎯 What is CRMS Field Tools?*
+*🎯 What is OpenJustice Field Tools?*
 A secure mobile tool for officers to perform field checks via WhatsApp.
 
 *🔍 Available Checks:*
@@ -303,14 +303,14 @@ A secure mobile tool for officers to perform field checks via WhatsApp.
 ✓ Report issues to station commander
 
 ━━━━━━━━━━━━━━━━━━━━
-_Sierra Leone Police - CRMS_
+_Sierra Leone Police - OpenJustice_
 _Protecting & Serving with Technology_
 
 Send /start to return to the main menu.`;
 }
 
 export function goodbyeTemplate(name: string): string {
-  return `👋 Goodbye, ${name}!\n\nYour session has been closed. You can start a new query anytime by sending /start.\n\n_Stay safe out there._\n\n━━━━━━━━━━━━━━━━━━━━\nSierra Leone Police - CRMS`;
+  return `👋 Goodbye, ${name}!\n\nYour session has been closed. You can start a new query anytime by sending /start.\n\n_Stay safe out there._\n\n━━━━━━━━━━━━━━━━━━━━\nSierra Leone Police - OpenJustice`;
 }
 
 export function restartTemplate(): string {
