@@ -37,6 +37,8 @@ import { BulkImportModule } from './modules/bulk-import/bulk-import.module';
 import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { IntegrityModule } from './modules/integrity/integrity.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PropertyTypesModule } from './modules/property-types/property-types.module';
+import { StolenPropertyModule } from './modules/stolen-property/stolen-property.module';
 
 const redisEnabled = process.env.REDIS_ENABLED !== 'false';
 if (!redisEnabled) {
@@ -83,6 +85,8 @@ if (!redisEnabled) {
     PersonsModule,
     EvidenceModule,
     VehiclesModule,
+    PropertyTypesModule,
+    StolenPropertyModule,
     AlertsModule,
     BackgroundChecksModule,
     AuditModule,
