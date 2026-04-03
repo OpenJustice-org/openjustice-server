@@ -82,7 +82,7 @@ export class StolenPropertyService {
     return this.stolenPropertyRepository.getStats(stationId);
   }
 
-  async create(data: CreateStolenPropertyDto, officerId: string) {
+  async create(data: CreateStolenPropertyDto & { stationId: string }, officerId: string) {
     const { identifiers, ...propertyData } = data;
 
     const property = await this.stolenPropertyRepository.create(

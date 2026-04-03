@@ -58,9 +58,13 @@ export class StolenPropertyController {
   @ApiOperation({ summary: 'Report new stolen property' })
   async create(
     @Body() data: CreateStolenPropertyDto,
-    @CurrentUser('id') officerId: string,
+    @CurrentUser() user: any,
   ) {
-    return this.stolenPropertyService.create(data, officerId);
+    const stationId = data.stationId || user.stationId;
+    return this.stolenPropertyService.create(
+      { ...data, stationId },
+      user.id,
+    );
   }
 
   @Patch(':id')

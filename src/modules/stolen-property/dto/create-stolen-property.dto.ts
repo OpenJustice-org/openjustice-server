@@ -62,9 +62,10 @@ export class CreateStolenPropertyDto {
   @IsString()
   circumstances?: string;
 
-  @ApiProperty({ description: 'Station ID where report is filed' })
+  @ApiPropertyOptional({ description: 'Station ID where report is filed. Defaults to officer\'s station if omitted.' })
+  @IsOptional()
   @IsString()
-  stationId: string;
+  stationId?: string;
 
   @ApiProperty({ type: [CreatePropertyIdentifierDto], description: 'At least one identifier required' })
   @IsArray()
