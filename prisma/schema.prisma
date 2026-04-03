@@ -78,6 +78,7 @@ model Officer {
   approvalRequests     PendingApproval[]  @relation("ApprovalRequests")
   approvalDecisions    PendingApproval[]  @relation("ApprovalDecisions")
   integrityAssignments IntegrityReport[]  @relation("IntegrityAssignments")
+  stolenPropertyReports StolenProperty[]
 
   @@index([badge])
   @@index([nationalId])
@@ -146,7 +147,8 @@ model Station {
   officers    Officer[]
   cases       Case[]
   evidence    Evidence[] @relation("EvidenceStation")
-  vehicles    Vehicle[]
+  vehicles          Vehicle[]
+  stolenProperties  StolenProperty[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -542,6 +544,96 @@ model Vehicle {
   @@index([ownerNIN])
   @@index([stationId])
   @@map("vehicles")
+}
+
+// ==================== STOLEN PROPERTY ====================
+
+model PropertyType {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  slug            String   @unique
+  description     String?
+  identifierTypes String[]
+  icon            String?
+  active          Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  stolenProperties StolenProperty[]
+
+  @@index([active])
+  @@index([slug])
+  @@map("property_types")
+}
+
+model StolenProperty {
+  id               String    @id @default(uuid())
+  referenceNumber  String    @unique
+
+  // Property details
+  propertyTypeId   String
+  propertyType     PropertyType @relation(fields: [propertyTypeId], references: [id])
+  brand            String?
+  model            String?
+  color            String?
+  description      String?   @db.Text
+
+  // Owner info
+  ownerName        String
+  ownerNIN         String?
+  ownerPhone       String?
+  ownerAddress     String?
+
+  // Theft details
+  status           String    @default("reported")
+  stolenDate       DateTime?
+  stolenLocation   String?
+  circumstances    String?   @db.Text
+
+  // Recovery
+  recoveredDate     DateTime?
+  recoveredLocation String?
+  recoveryNotes     String?   @db.Text
+
+  // Linkage
+  stationId        String
+  station          Station   @relation(fields: [stationId], references: [id])
+  reportedById     String
+  reportedBy       Officer   @relation(fields: [reportedById], references: [id])
+
+  // Identifiers
+  identifiers      PropertyIdentifier[]
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([referenceNumber])
+  @@index([status])
+  @@index([stationId])
+  @@index([reportedById])
+  @@index([propertyTypeId])
+  @@index([ownerNIN])
+  @@index([stolenDate])
+  @@index([stationId, status])
+  @@map("stolen_properties")
+}
+
+model PropertyIdentifier {
+  id               String   @id @default(uuid())
+  stolenPropertyId String
+  stolenProperty   StolenProperty @relation(fields: [stolenPropertyId], references: [id], onDelete: Cascade)
+  type             String
+  value            String
+  valueLower       String
+
+  createdAt        DateTime @default(now())
+
+  @@index([valueLower])
+  @@index([stolenPropertyId])
+  @@index([type])
+  @@unique([stolenPropertyId, type, value])
+  @@map("property_identifiers")
 }
 
 // ==================== WHATSAPP ====================
