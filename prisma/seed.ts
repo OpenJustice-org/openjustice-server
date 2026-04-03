@@ -69,6 +69,16 @@ async function main() {
     { resource: 'vehicles', action: 'update', scope: 'station' },
     { resource: 'vehicles', action: 'delete', scope: 'national' },
 
+    // Stolen Property
+    { resource: 'stolen-property', action: 'create', scope: 'station' },
+    { resource: 'stolen-property', action: 'read', scope: 'station' },
+    { resource: 'stolen-property', action: 'read', scope: 'national' },
+    { resource: 'stolen-property', action: 'update', scope: 'station' },
+    { resource: 'stolen-property', action: 'delete', scope: 'national' },
+
+    // Property Types
+    { resource: 'property-types', action: 'read', scope: 'station' },
+
     // Analytics
     { resource: 'analytics', action: 'read', scope: 'station' },
     { resource: 'analytics', action: 'read', scope: 'national' },
@@ -152,6 +162,8 @@ async function main() {
           p.resource === 'bgcheck' ||
           p.resource === 'reports' ||
           p.resource === 'vehicles' ||
+          p.resource === 'stolen-property' ||
+          (p.resource === 'property-types' && p.action === 'read') ||
           p.resource === 'analytics' ||
           p.resource === 'bulk-import' ||
           // Administrative (new)
@@ -192,6 +204,8 @@ async function main() {
           p.resource === 'bgcheck' ||
           p.resource === 'reports' ||
           (p.resource === 'vehicles' && p.action !== 'delete') ||
+          (p.resource === 'stolen-property' && p.action !== 'delete') ||
+          (p.resource === 'property-types' && p.action === 'read') ||
           p.resource === 'analytics' ||
           (p.resource === 'bulk-import' && p.action !== 'delete') ||
           // Administrative read-only (new)
@@ -225,6 +239,8 @@ async function main() {
           p.resource === 'evidence' ||
           p.resource === 'bgcheck' ||
           p.resource === 'vehicles' ||
+          p.resource === 'stolen-property' ||
+          (p.resource === 'property-types' && p.action === 'read') ||
           (p.resource === 'officers' && p.action === 'read') ||
           (p.resource === 'stations' && p.action === 'read') ||
           (p.resource === 'alerts' && p.action === 'read') ||
@@ -945,12 +961,38 @@ async function main() {
 
   console.log(`Created ${securityConfigs.length} security governance config entries`);
 
+  // ==================== PROPERTY TYPES ====================
+  console.log('Creating property types...');
+
+  const propertyTypes = [
+    { name: 'Mobile Phone', slug: 'mobile-phone', identifierTypes: ['IMEI', 'Serial Number'], icon: 'smartphone', sortOrder: 1 },
+    { name: 'Laptop', slug: 'laptop', identifierTypes: ['Serial Number', 'MAC Address'], icon: 'laptop', sortOrder: 2 },
+    { name: 'Tablet', slug: 'tablet', identifierTypes: ['IMEI', 'Serial Number'], icon: 'tablet', sortOrder: 3 },
+    { name: 'Television', slug: 'television', identifierTypes: ['Serial Number', 'Model Number'], icon: 'tv', sortOrder: 4 },
+    { name: 'Generator', slug: 'generator', identifierTypes: ['Serial Number', 'Engine Number'], icon: 'zap', sortOrder: 5 },
+    { name: 'Solar Panel', slug: 'solar-panel', identifierTypes: ['Serial Number', 'Model Number'], icon: 'sun', sortOrder: 6 },
+    { name: 'Bicycle', slug: 'bicycle', identifierTypes: ['Frame Number', 'Serial Number'], icon: 'bike', sortOrder: 7 },
+    { name: 'Motorcycle', slug: 'motorcycle', identifierTypes: ['Chassis Number', 'Engine Number', 'License Plate'], icon: 'bike', sortOrder: 8 },
+    { name: 'Camera', slug: 'camera', identifierTypes: ['Serial Number'], icon: 'camera', sortOrder: 9 },
+    { name: 'Other', slug: 'other', identifierTypes: ['Serial Number', 'Other'], icon: 'package', sortOrder: 99 },
+  ];
+
+  for (const pt of propertyTypes) {
+    await prisma.propertyType.upsert({
+      where: { slug: pt.slug },
+      update: { name: pt.name, identifierTypes: pt.identifierTypes, icon: pt.icon, sortOrder: pt.sortOrder },
+      create: pt,
+    });
+  }
+
+  console.log(`Created ${propertyTypes.length} property types`);
+
   // ==================== SUMMARY ====================
   console.log('\nSeeding complete!\n');
   console.log('Database Summary:');
   console.log(`  ${createdPermissions.length} permissions | 7 roles | 3 stations | 6 officers`);
   console.log('  4 persons | 3 vehicles | 2 cases | 1 wanted record | 6 evidence');
-  console.log('  3 security governance config entries');
+  console.log(`  ${propertyTypes.length} property types | 3 security governance config entries`);
 }
 
 main()
