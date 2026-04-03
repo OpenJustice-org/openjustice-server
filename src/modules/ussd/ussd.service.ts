@@ -145,7 +145,7 @@ export class UssdService {
     });
 
     return this.continueResponse(
-      `Welcome ${officer.name}\n\nSelect query type:\n1. Wanted Person Check\n2. Missing Person Check\n3. Background Check\n4. Vehicle Check`,
+      `Welcome ${officer.name}\n\nSelect query type:\n1. Wanted Person Check\n2. Missing Person Check\n3. Background Check\n4. Vehicle Check\n5. Stolen Property Check`,
     );
   }
 
@@ -155,12 +155,13 @@ export class UssdService {
       '2': 'missing',
       '3': 'background',
       '4': 'vehicle',
+      '5': 'stolen-property',
     };
 
     const queryType = queryTypes[input];
     if (!queryType) {
       return this.continueResponse(
-        'Invalid selection.\n\n1. Wanted Person Check\n2. Missing Person Check\n3. Background Check\n4. Vehicle Check',
+        'Invalid selection.\n\n1. Wanted Person Check\n2. Missing Person Check\n3. Background Check\n4. Vehicle Check\n5. Stolen Property Check',
       );
     }
 
@@ -172,6 +173,7 @@ export class UssdService {
       missing: 'Enter person name or NIN:',
       background: 'Enter NIN for background check:',
       vehicle: 'Enter license plate number:',
+      'stolen-property': 'Enter IMEI, serial number, or identifier:',
     };
 
     return this.continueResponse(prompts[queryType]);
@@ -199,6 +201,9 @@ export class UssdService {
           break;
         case 'vehicle':
           resultSummary = await this.searchVehicle(searchTerm);
+          break;
+        case 'stolen-property':
+          resultSummary = await this.searchStolenProperty(searchTerm);
           break;
         default:
           resultSummary = 'Unknown query type';
@@ -326,6 +331,60 @@ export class UssdService {
     }
 
     return result;
+  }
+
+  private async searchStolenProperty(term: string): Promise<string> {
+    const results = await this.prisma.propertyIdentifier.findMany({
+      where: {
+        valueLower: { contains: term.toLowerCase().trim() },
+      },
+      include: {
+        stolenProperty: {
+          include: {
+            propertyType: true,
+            station: { select: { name: true } },
+          },
+        },
+      },
+      take: 3,
+    });
+
+    if (results.length === 0) {
+      return `ID: ${term}\nNo stolen property records found.`;
+    }
+
+    // Log lookup hit for stolen items
+    const stolenMatches = results.filter(
+      (r) => r.stolenProperty.status === 'stolen',
+    );
+    if (stolenMatches.length > 0) {
+      await this.prisma.auditLog.create({
+        data: {
+          entityType: 'stolen_property',
+          entityId: stolenMatches[0].stolenProperty.id,
+          officerId: 'system',
+          action: 'stolen_property_lookup_hit',
+          details: {
+            searchTerm: term,
+            source: 'ussd',
+            matchedPropertyIds: stolenMatches.map((r) => r.stolenProperty.id),
+          },
+          success: true,
+        },
+      });
+    }
+
+    return results
+      .map((r, i) => {
+        const sp = r.stolenProperty;
+        const desc = [sp.brand, sp.model].filter(Boolean).join(' ');
+        let line = `${i + 1}. ${sp.propertyType.name}${desc ? ` - ${desc}` : ''}\nRef: ${sp.referenceNumber}\nStatus: ${sp.status.toUpperCase()}`;
+        if (sp.status === 'stolen') {
+          line += '\nALERT: STOLEN!';
+        }
+        return line;
+      })
+      .join('\n\n');
   }
 
   async registerOfficer(officerId: string, phoneNumber: string, quickPin: string) {
