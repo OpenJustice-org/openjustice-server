@@ -33,6 +33,20 @@ export interface VehicleResult {
   ownerName: string | null;
 }
 
+/** Matches the shape from stolen property identifier queries */
+export interface StolenPropertyResult {
+  type: string;
+  value: string;
+  stolenProperty: {
+    referenceNumber: string;
+    brand: string | null;
+    model: string | null;
+    status: string;
+    propertyType: { name: string };
+    station: { name: string };
+  };
+}
+
 /** Whapi interactive list message payload */
 export interface WhapiListMessage {
   to: string;

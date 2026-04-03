@@ -3,6 +3,7 @@ import type {
   MissingPersonResult,
   BackgroundCheckResult,
   VehicleResult,
+  StolenPropertyResult,
   WhapiListMessage,
 } from './whatsapp.interfaces';
 
@@ -85,6 +86,11 @@ export function mainMenuTemplate(name: string, phone: string): WhapiListMessage 
               title: '🚗 Vehicle Check',
               description: 'Check stolen vehicle status',
             },
+            {
+              id: 'stolen-property',
+              title: '📱 Stolen Property',
+              description: 'Check IMEI, serial number, etc.',
+            },
           ],
         },
         {
@@ -129,6 +135,7 @@ export function searchPromptTemplate(queryType: string): string {
     missing: '🔎 *Missing Person Check*\n\nEnter the person\'s name to search:',
     background: '📋 *Background Check*\n\nEnter the National Identification Number (NIN):',
     vehicle: '🚗 *Vehicle Check*\n\nEnter the license plate number:',
+    'stolen-property': '📱 *Stolen Property Check*\n\nEnter the IMEI, serial number, or any identifier:',
   };
 
   return prompts[queryType] || 'Enter your search term:';
@@ -242,6 +249,37 @@ export function vehicleNotFoundTemplate(plate: string): string {
   return `🚗 *Vehicle Check*\n━━━━━━━━━━━━━━━━━━━━\n\n🔢 Plate: *${plate.toUpperCase()}*\n✅ No records found.\n\nSend /start for a new query.`;
 }
 
+// ─── Stolen Property Results ─────────────────────────────
+
+export function stolenPropertyResultsTemplate(term: string, results: StolenPropertyResult[]): string {
+  const header = `📱 *STOLEN PROPERTY CHECK*\n━━━━━━━━━━━━━━━━━━━━\n\n🔍 Search: *${term}*\n_${results.length} record${results.length !== 1 ? 's' : ''} found_\n`;
+
+  const entries = results.map((r, i) => {
+    const sp = r.stolenProperty;
+    const desc = [sp.brand, sp.model].filter(Boolean).join(' ');
+    const stolen = sp.status === 'stolen';
+
+    let entry = `\n*${i + 1}. ${sp.propertyType.name}*${desc ? ` — ${desc}` : ''}\n` +
+      `📋 Ref: ${sp.referenceNumber}\n` +
+      `🔖 ${r.type}: ${r.value}\n` +
+      `📍 Station: ${sp.station.name}\n` +
+      `Status: *${sp.status.toUpperCase()}*`;
+
+    if (stolen) {
+      entry += '\n🚨 *ALERT: This item is reported STOLEN!*';
+    }
+
+    return entry;
+  });
+
+  return header + entries.join('\n━━━━━━━━━━━━━━━━━━━━') +
+    '\n\n━━━━━━━━━━━━━━━━━━━━\n_Report suspicious items to your station._\n\nSend /start for a new query.';
+}
+
+export function stolenPropertyNotFoundTemplate(term: string): string {
+  return `📱 *Stolen Property Check*\n━━━━━━━━━━━━━━━━━━━━\n\n🔍 Search: *${term}*\n✅ No stolen property records found.\n\nSend /start for a new query.`;
+}
+
 // ─── Generic / System ─────────────────────────────────────
 
 export function errorTemplate(error?: string): string {
@@ -277,6 +315,11 @@ A secure mobile tool for officers to perform field checks via WhatsApp.
    • Search by license plate
    • Check stolen vehicle status
    • View vehicle owner info
+
+*5. 📱 Stolen Property Check*
+   • Search by IMEI, serial number, etc.
+   • Check if item is reported stolen
+   • View property details & station
 
 ━━━━━━━━━━━━━━━━━━━━
 

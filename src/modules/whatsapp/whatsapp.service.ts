@@ -195,10 +195,12 @@ export class WhatsappService {
       '2': 'missing',
       '3': 'background',
       '4': 'vehicle',
+      '5': 'stolen-property',
       'wanted': 'wanted',
       'missing': 'missing',
       'background': 'background',
       'vehicle': 'vehicle',
+      'stolen-property': 'stolen-property',
     };
 
     const queryType = types[text];
@@ -231,6 +233,9 @@ export class WhatsappService {
         break;
       case 'vehicle':
         result = await this.queryVehicle(term);
+        break;
+      case 'stolen-property':
+        result = await this.queryStolenProperty(term);
         break;
       default:
         result = 'Unknown query type.';
@@ -310,6 +315,48 @@ export class WhatsappService {
     if (!vehicle) return templates.vehicleNotFoundTemplate(plate);
 
     return templates.vehicleResultTemplate(plate, vehicle);
+  }
+
+  private async queryStolenProperty(term: string): Promise<string> {
+    const results = await this.prisma.propertyIdentifier.findMany({
+      where: {
+        valueLower: { contains: term.toLowerCase().trim() },
+      },
+      include: {
+        stolenProperty: {
+          include: {
+            propertyType: true,
+            station: { select: { name: true } },
+          },
+        },
+      },
+      take: 5,
+    });
+
+    if (results.length === 0) return templates.stolenPropertyNotFoundTemplate(term);
+
+    // Log lookup hit for stolen items
+    const stolenMatches = results.filter(
+      (r) => r.stolenProperty.status === 'stolen',
+    );
+    if (stolenMatches.length > 0) {
+      await this.prisma.auditLog.create({
+        data: {
+          entityType: 'stolen_property',
+          entityId: stolenMatches[0].stolenProperty.id,
+          officerId: 'system',
+          action: 'stolen_property_lookup_hit',
+          details: {
+            searchTerm: term,
+            source: 'whatsapp',
+            matchedPropertyIds: stolenMatches.map((r) => r.stolenProperty.id),
+          },
+          success: true,
+        },
+      });
+    }
+
+    return templates.stolenPropertyResultsTemplate(term, results);
   }
 
   private async sendMessage(to: string, body: string) {
