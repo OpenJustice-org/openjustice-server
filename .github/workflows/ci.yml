@@ -52,4 +52,4 @@ jobs:
         run: npx prisma generate
 
       - name: Run tests
-        run: npm test -- --passWithNoTests
+        run: npm test -- --coverage
